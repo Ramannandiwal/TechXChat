@@ -6,14 +6,15 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import "./index.css";
-import Homepage from "./pages/Homepage.jsx";
+
 import ChatPage from "./pages/ChatPage.jsx";
+import App  from "./App.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     
-    element:<Homepage/>,
+    element:<App/>,
  
   },
   {

@@ -1,6 +1,5 @@
 
-import { Route } from 'react-router-dom/cjs/react-router-dom.min'
-import './App.css'
+import "../src/App.css"
 import Homepage from "./pages/Homepage"
 function App() {
 
@@ -8,10 +7,10 @@ function App() {
   return (
     <>
       
-      <div className='App'>
-   
+     <div className="App h-screen">
+        <Homepage/>
+     </div>
 
-      </div>
 
 
     </>
