@@ -8,6 +8,7 @@ require("dotenv").config();
 const app = express();
 app.use(express.json());
 const connectDB = require("./config/db");
+const { notFound, errorhandler } = require('./middleware/errorMiddleware');
 connectDB();
 const port = process.env.PORT
 app.use(cors())
@@ -21,6 +22,8 @@ app.get("/api/chat/:id",(req,res)=>{
  res.send(singleChat)
 })
 app.use('/api/user',userRoutes)
+app.use(notFound)
+app.use(errorhandler)
 
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`.yellow.bold))
