@@ -13,6 +13,7 @@ const { notFound, errorhandler } = require('./middleware/errorMiddleware');
 connectDB();
 const port = process.env.PORT
 app.use(cors())
+//hello 
 app.get('/', (req, res) => res.send('Hello World!'))
 // app.get("/api/chat",(req,res)=>{
 //   res.send(chats)
