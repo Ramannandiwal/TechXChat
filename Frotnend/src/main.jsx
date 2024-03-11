@@ -19,17 +19,16 @@ const router = createBrowserRouter([
   },
   {
     path: "/chats",
-    element:<ChatPage/>,
+    element:<ChatProvider><ChatPage/></ChatProvider> ,
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ChakraProvider>
     <RouterProvider router={router}>
-      <ChatProvider >
+   <ChatProvider>
         <App/>
-        <ChatPage/>
-      </ChatProvider>
+   </ChatProvider>
     </RouterProvider>
   </ChakraProvider>
 );

@@ -1,5 +1,6 @@
 
 import "../src/App.css"
+import ChatProvider from "./Context/ChatProvider.jsx";
 import { Router } from "react-router-dom"
 import Homepage from "./pages/Homepage"
 function App() {
@@ -9,7 +10,10 @@ function App() {
     <>
       
      <div className="App h-screen">
-        <Homepage/>
+     <ChatProvider >
+     <Homepage/>
+        </ChatProvider>
+        
      </div>
 
 

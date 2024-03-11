@@ -1,13 +1,18 @@
 // ChatPage.jsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { Box } from "@chakra-ui/layout";
 import "./ChatPage.css"
 import SideDrawer from '../components/miscellinious/SideDrawer';
 import MyChat from '../components/MyChat';
 import ChatBox from '../components/ChatBox';
+import { ChatState } from '../Context/ChatProvider';
 
 const ChatPage = () => {
-        const user = JSON.parse(localStorage.getItem("userInfo"));
+    
+        
+        const {user} = ChatState();
+        
+     
 
     return (
         <div className='ChatPage w-[100%] h-screen '>
