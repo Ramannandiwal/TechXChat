@@ -33,7 +33,12 @@ const {user,setSelectedChat,chats,setChats}= ChatState();
     navigate("/")
     
   };
-
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+      
+    }
+};
 
 
   const handleSearch= async()=>{
@@ -167,10 +172,12 @@ paddingBottom={2}
 >
 <Input 
 placeholder='Search by name or email'
+onKeyDown={handleKeyDown}
 mr={2}
 value={search}
 onChange={(e)=>setsearch(e.target.value)}/>
 <Button 
+
 onClick={handleSearch}
 >Go</Button>
 </Box>

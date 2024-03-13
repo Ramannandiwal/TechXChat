@@ -169,7 +169,7 @@ const addToGroup = expressAsyncHandler(
 const removeFromGroup = expressAsyncHandler(
   async(req,res)=>{
      const {chatId,userId}=req.body;
-     console.log(chatId,userId);
+  
      const removed = await Chat.findByIdAndUpdate(
       chatId,
       {
@@ -187,7 +187,7 @@ const removeFromGroup = expressAsyncHandler(
      }
      else{
       
-      // res.json.toString(removed);
+      res.json(removed);
 
      }
   }

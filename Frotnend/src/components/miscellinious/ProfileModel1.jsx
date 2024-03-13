@@ -13,9 +13,9 @@ import {
   } from '@chakra-ui/react'
 import { ChatState } from '../../Context/ChatProvider'
 
-function ProfileModel({children}) {
+function ProfileModel1({children,user}) {
  
-    const {user, setuser} =  ChatState()
+   
  
     const { isOpen, onOpen, onClose } = useDisclosure()
   return <>
@@ -37,7 +37,9 @@ function ProfileModel({children}) {
            fontFamily={"fantasy"}
            display={"flex"}
            justifyContent={"center"}
-          >{user&& user.name}</ModalHeader>
+          >
+          
+            { user.name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody display={"flex"}
               flexDir={"column"}
@@ -73,4 +75,4 @@ function ProfileModel({children}) {
 
 }
 
-export default ProfileModel
+export default ProfileModel1
