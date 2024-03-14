@@ -15,7 +15,7 @@ const ChatPage = () => {
      
 
     return (
-        <div className='ChatPage w-[100%] h-screen '>
+        <div className=' ChatPage w-[100%] h-screen '>
             {user && <SideDrawer />}
             <Box
             display={"flex"}

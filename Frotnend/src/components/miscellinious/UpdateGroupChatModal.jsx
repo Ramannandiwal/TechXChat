@@ -25,7 +25,7 @@ import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
 import ChatLoading from "../ChatLoading";
 
-const UpdateGroupChatModal = ({ fetchAgain, setfetchAgain }) => {
+const UpdateGroupChatModal = ({ fetchAgain, setfetchAgain,fetchMessages}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState("");
   const [search, setSearch] = useState("");
@@ -190,6 +190,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setfetchAgain }) => {
 
       user1._id === user._id ? setSelectedChat() : setSelectedChat(data);
       setfetchAgain(!fetchAgain);
+      fetchMessages();
      
       setLoading(false);
     } catch (error) {
