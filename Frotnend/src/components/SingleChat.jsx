@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+
 import { ChatState } from '../Context/ChatProvider'
 import { Box, FormControl, IconButton, Input, Spinner, Text, Toast, useToast } from '@chakra-ui/react';
 import { ArrowBackIcon} from '@chakra-ui/icons'
@@ -8,7 +9,12 @@ import UpdateGroupChatModal from './miscellinious/UpdateGroupChatModal';
 import ProfileModel1 from './miscellinious/ProfileModel1';
 import axios from 'axios';
 import ScrollableChat from './ScrollableChat';
+import io from "socket.io-client"
+const ENDPOINT = "http://localhost:3000/";
+var socket,selectedChatCompare;
+
 function SingleChat({fetchAgain,setfetchAgain}) {
+  const[socketConnected,setsocketConnected]=useState(false);
   const [messages, setMessages] = useState([])
   const [loading ,setLoading] = useState(false)
   const [newmessage,setnewMessage]=useState("");
@@ -16,7 +22,13 @@ function SingleChat({fetchAgain,setfetchAgain}) {
   const typingHandler = (e)=>{
     setnewMessage(e.target.value);
   }
+  useEffect(() => {
+  
+    socket = io(ENDPOINT);
+    socket.emit("setup",user);
+    socket.on("connection",()=>setsocketConnected(true))
 
+}, []);
   const fetchMessages = async()=>{
     if(!selectedChat){
       return
@@ -34,6 +46,7 @@ function SingleChat({fetchAgain,setfetchAgain}) {
           
           setMessages(data.data);
           setLoading(false)
+          socket.emit("join chat",selectedChat._id);
           
         } catch (error) {
           toast({
@@ -47,6 +60,17 @@ function SingleChat({fetchAgain,setfetchAgain}) {
         }
 
   }
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {///}
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
   const sendMessage = async(event)=>{
          if(event.key === "Enter" && newmessage){
              try {
@@ -63,7 +87,7 @@ function SingleChat({fetchAgain,setfetchAgain}) {
                 chatId:selectedChat._id,
               }, config);
    
-            
+            socket.emit("new message",data);
               setMessages([...messages,data])
 
              } catch (error) {
@@ -79,9 +103,13 @@ function SingleChat({fetchAgain,setfetchAgain}) {
          }
   }
 
+
+
     const {user,selectedChat,setSelectedChat}=ChatState();
     useEffect(()=>{
       fetchMessages();
+      selectedChatCompare = selectedChat;
+
     },[selectedChat])
   return (
  <>

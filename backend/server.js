@@ -1,13 +1,23 @@
 const express = require('express');
 const { chats } = require('./data/data');
-const { faker } = require('@faker-js/faker');
+const { faker, ro } = require('@faker-js/faker');
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes")
 const chatRoutes = require("./routes/chatRoutes")
+const corsOptions = {
+    origin: 'http://localhost:5173/chats', // Allow requests from localhost:5173
+    methods: 'GET,POST', // Allow only GET and POST requests
+    allowedHeaders: 'Content-Type,Authorization', // Allow specific headers
+  };
+  
+
+ 
 const colors = require("colors");
 require("dotenv").config();
 const messageRoutes = require("./routes/messageRoutes")
 const app = express();
+
+app.use(cors())
 app.use(express.json());
 const connectDB = require("./config/db");
 const { notFound, errorhandler } = require('./middleware/errorMiddleware');
@@ -15,7 +25,7 @@ const User = require('./Models/userModel');
 const generateToken = require('./config/generateToken');
 connectDB();
 const port = process.env.PORT
-app.use(cors())
+
 //hello 
 app.get('/', (req, res) => res.send('Hello World!'))
 // app.get("/api/chat",(req,res)=>{
@@ -78,8 +88,47 @@ app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api/user',userRoutes)
 app.use("/api/chat",chatRoutes)
 app.use("/api/message",messageRoutes);
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`.yellow.bold))
+const io = require("socket.io")(server, {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"]
+    },
+    pingTimeout: 60000
+  });
+  
+  io.on("connection", (socket) => {
+    socket.on('setup', (userData) => {
+      // Join user-specific room based on user ID
+      socket.join(userData._id);
+      console.log(`${userData.name} connected.`);
+    });
+  
+    socket.on("join chat", (room) => {
+      // Join chat-specific room
+      socket.join(room);
+      console.log(`User joined chat room ${room}`);
+    });
+  
+    socket.on("new message", (newMessageReceived) => {
+      const chat = newMessageReceived.chat;
+      if (!chat.users) {
+        return console.log(`Chat users not defined`);
+      }
+  
+      chat.users.forEach(user => {
+        if (user._id !== newMessageReceived.sender._id) {
+         
+          // Emit message to each user in the chat room except the sender
+          socket.to(user._id).emit("message recieved", newMessageReceived);
+        }
+      });
+    });
+  });
+  
+
 app.use(notFound)
 app.use(errorhandler)
 
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`.yellow.bold))
+
