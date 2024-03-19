@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Badge } from "@material-tailwind/react";
 import {Button, Tooltip,Text, Menu, MenuButton, MenuList, MenuItem, MenuDivider, useDisclosure, Input, useToast, Spinner} from "@chakra-ui/react"
 import {Box} from "@chakra-ui/layout"
 import axios from "axios"
@@ -18,6 +19,7 @@ import ProfileModel from './ProfileModel'
 import ChatLoading from '../ChatLoading'
 import UserListItem from '../UserAvatar/UserListItem'
 import { ChatState } from '../../Context/ChatProvider'
+import { getSender } from '../../config/ChatLogics'
 function SideDrawer() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ function SideDrawer() {
   const [loading, setloading] = useState(false)
   const [loadingChat,setloadingChat]=useState()
  
-const {user,setSelectedChat,chats,setChats}= ChatState();
+const {user,setSelectedChat,chats,setChats,notification,setNotification}= ChatState();
   const toast = useToast();
   const logouthandler = ()=>{
     localStorage.removeItem("userInfo");
@@ -39,7 +41,6 @@ const {user,setSelectedChat,chats,setChats}= ChatState();
       
     }
 };
-
 
   const handleSearch= async()=>{
          if(!search){
@@ -127,13 +128,27 @@ const {user,setSelectedChat,chats,setChats}= ChatState();
 <Text fontSize={"3xl"} fontFamily={"fantasy"}>TECHxCHAT</Text>
   
   <div>
+   
     <Menu>
-      <MenuButton p={1}>
-      <BellIcon fontSize={"2xl"} m={1}/>
-      </MenuButton>
-      {/* <MenuList>
+      <MenuButton p={2} m={3}>
 
-      </MenuList> */}
+      
+      <Badge content={notification.length}>
+      <BellIcon fontSize={"2xl"} m={1}/>
+    
+    </Badge>
+      </MenuButton>
+      <MenuList pl={2} textColor={"black"} >
+        {!notification.length&&"no new messages"}
+       {notification.map((noti)=>{
+        return (<MenuItem onClick={()=>{
+          setSelectedChat(noti.chat);
+          setNotification(notification.filter((n)=>n!==noti))
+        }} key={noti._id}>
+          {noti.chat.isGroupChat?`New Message in ${noti.chat.chatName}`:`New Message from ${getSender(user,noti.chat.users)}`}
+       </MenuItem>)
+       })}
+      </MenuList>
 
     </Menu>
     <Menu>

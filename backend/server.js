@@ -1,5 +1,6 @@
 const express = require('express');
 const { chats } = require('./data/data');
+const path = require("path")
 const { faker, ro } = require('@faker-js/faker');
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes")
@@ -27,7 +28,7 @@ connectDB();
 const port = process.env.PORT
 
 //hello 
-app.get('/', (req, res) => res.send('Hello World!'))
+
 // app.get("/api/chat",(req,res)=>{
 //   res.send(chats)
 // })
@@ -101,6 +102,7 @@ const io = require("socket.io")(server, {
     socket.on('setup', (userData) => {
       // Join user-specific room based on user ID
       socket.join(userData._id);
+      socket.emit("connected")
       console.log(`${userData.name} connected.`);
     });
   
@@ -109,6 +111,8 @@ const io = require("socket.io")(server, {
       socket.join(room);
       console.log(`User joined chat room ${room}`);
     });
+    socket.on("typing", (room) => socket.in(room).emit("typing"));
+    socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
   
     socket.on("new message", (newMessageReceived) => {
       const chat = newMessageReceived.chat;
@@ -125,10 +129,35 @@ const io = require("socket.io")(server, {
       });
     });
   });
-  
+  // --------------------------------------Deployement 
+const __dirname1=path.resolve();
 
+if(process.env.NODE_ENV==='production'){
+         app.use(express.static(path.join(__dirname1,'/frontend/build')));
+}else{
+app.get("/",(req,res)=>{
+  res.send("Api is running Succesfully ")
+})
+}
+
+// --------------------------------
 app.use(notFound)
 app.use(errorhandler)
 
 
 
+
+
+
+
+
+
+
+
+
+
+{/* <Badge content={notification.length}>
+    <MenuButton p={1}>
+      <BellIcon fontSize={"2xl"} m={1}/>
+      </MenuButton>
+    </Badge> */}

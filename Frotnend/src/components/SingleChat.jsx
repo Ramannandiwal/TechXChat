@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
+import animationData from "../animation/typing.json"
 import { ChatState } from '../Context/ChatProvider'
 import { Box, FormControl, IconButton, Input, Spinner, Text, Toast, useToast } from '@chakra-ui/react';
 import { ArrowBackIcon} from '@chakra-ui/icons'
@@ -8,26 +8,56 @@ import ProfileModel from './miscellinious/ProfileModel';
 import UpdateGroupChatModal from './miscellinious/UpdateGroupChatModal';
 import ProfileModel1 from './miscellinious/ProfileModel1';
 import axios from 'axios';
+import Lottie from 'react-lottie'
 import ScrollableChat from './ScrollableChat';
 import io from "socket.io-client"
 const ENDPOINT = "http://localhost:3000/";
 var socket,selectedChatCompare;
 
 function SingleChat({fetchAgain,setfetchAgain}) {
+  const {user,selectedChat,setSelectedChat,notification,setNotification}=ChatState();
   const[socketConnected,setsocketConnected]=useState(false);
+const [typing, setTyping] = useState(false)
+const [istyping,setIsTyping]=useState(false)
   const [messages, setMessages] = useState([])
   const [loading ,setLoading] = useState(false)
   const [newmessage,setnewMessage]=useState("");
   const toast = useToast();
+  const defaultOptions={
+    loop:true,
+    autoplay:true,
+    animationData:animationData,
+    rendererSettings:{
+      preserveAspectRatio:"xMidYMid slice",
+    }
+  }
   const typingHandler = (e)=>{
+
     setnewMessage(e.target.value);
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   }
   useEffect(() => {
   
     socket = io(ENDPOINT);
     socket.emit("setup",user);
-    socket.on("connection",()=>setsocketConnected(true))
-
+    socket.on("connected", () => setsocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
 }, []);
   const fetchMessages = async()=>{
     if(!selectedChat){
@@ -60,19 +90,31 @@ function SingleChat({fetchAgain,setfetchAgain}) {
         }
 
   }
+  
   useEffect(() => {
     socket.on("message recieved", (newMessageRecieved) => {
       if (
         !selectedChatCompare || // if chat is not selected or doesn't match current chat
         selectedChatCompare._id !== newMessageRecieved.chat._id
-      ) {///}
+      ) {
+        
+       if(!notification.includes(newMessageRecieved)){
+        setNotification([newMessageRecieved,...notification]);
+    
+
+        setfetchAgain(!fetchAgain);
+       }
+        
       } else {
+        
         setMessages([...messages, newMessageRecieved]);
       }
     });
   });
+
   const sendMessage = async(event)=>{
          if(event.key === "Enter" && newmessage){
+          socket.emit("stop typing",selectedChat._id)
              try {
               const config = {
                 headers: {
@@ -105,12 +147,12 @@ function SingleChat({fetchAgain,setfetchAgain}) {
 
 
 
-    const {user,selectedChat,setSelectedChat}=ChatState();
-    useEffect(()=>{
+      useEffect(()=>{
       fetchMessages();
       selectedChatCompare = selectedChat;
 
     },[selectedChat])
+  
   return (
  <>
  
@@ -174,14 +216,28 @@ function SingleChat({fetchAgain,setfetchAgain}) {
           {/* messages */}
           </div> 
           <FormControl isRequired mt={3} onKeyDown={sendMessage} >
-            <Input w={"100%"}
-            variant="filled"
-            bg={"#E0E0E0"}
-            placeholder='Enter  a Message ....'
-            onChange={typingHandler}
-            value={newmessage}
-            />
-          </FormControl>
+          {istyping ? (
+                <div>
+                <Lottie
+                options={defaultOptions}
+                width={"70px"}
+                style={{marginBottom:15,marginLeft:0}}
+                />
+                
+                </div>
+              ) : (
+                <></>
+              )}
+  <Input
+    w={"100%"}
+    variant="filled"
+    bg={"#E0E0E0"}
+    placeholder='Enter a Message ....'
+    onChange={typingHandler}
+    value={newmessage}
+  />
+</FormControl>
+
    
          
          
